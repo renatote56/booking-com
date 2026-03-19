@@ -2,13 +2,13 @@
 
 import { useFormStatus } from "react-dom";
 
-export default function SubmitButton() {
+export default function RemoveFromCartButton() {
   const { pending } = useFormStatus();
 
   return (
-    <button type="submit" disabled={pending} className="btn btn-primary">
+    <button type="submit" disabled={pending} className="btn btn-danger">
       {pending && <span className="btn-spinner" />}
-      {pending ? "Agregando..." : "Agregar al carrito"}
+      {pending ? "Eliminando..." : "Eliminar"}
     </button>
   );
 }
