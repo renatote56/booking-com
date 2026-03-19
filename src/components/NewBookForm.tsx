@@ -1,11 +1,11 @@
 "use client"
 
 import { useActionState } from "react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 import { publishBook, type BookFormState } from "@/actions/bookActions";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const initialState: BookFormState = {};
 
@@ -20,10 +20,17 @@ function SubmitBookButton() {
 }
 
 export default function NewBookForm() {
+  const router = useRouter();
   const [state, formAction] = useActionState(publishBook, initialState);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (state.success) {
+      router.push("/");
+    }
+  }, [state.success, router]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,21 +49,6 @@ export default function NewBookForm() {
     setFileName(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
-
-  if (state.success) {
-    return (
-      <div className="new-book-success">
-        <div className="new-book-success-icon">✓</div>
-        <h3 className="new-book-success-title">¡Obra publicada!</h3>
-        <p className="new-book-success-sub">
-          Tu libro ha sido añadido al catálogo con éxito.
-        </p>
-        <Link href="/" className="btn btn-primary" style={{ marginTop: "var(--sp-4)" }}>
-          Ver catálogo
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <form action={formAction} className="new-book-form">

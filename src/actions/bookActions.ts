@@ -48,31 +48,36 @@ export async function publishBook(
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
 
-  // Handle image upload
-  let imagePath = "/default-book.jpg";
-  if (imageFile && imageFile.size > 0) {
-    const bytes = await imageFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const ext = path.extname(imageFile.name) || ".jpg";
-    const filename = `${slug}-${Date.now()}${ext}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+  try {
+    // Handle image upload
+    let imagePath = "/default-book.jpg";
+    if (imageFile && imageFile.size > 0) {
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const ext = path.extname(imageFile.name) || ".jpg";
+      const filename = `${slug}-${Date.now()}${ext}`;
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
 
-    await mkdir(uploadsDir, { recursive: true });
-    await writeFile(path.join(uploadsDir, filename), buffer);
+      await mkdir(uploadsDir, { recursive: true });
+      await writeFile(path.join(uploadsDir, filename), buffer);
 
-    imagePath = `/uploads/${filename}`;
+      imagePath = `/uploads/${filename}`;
+    }
+
+    addBook({
+      title: title!,
+      author: author!,
+      synopsis: synopsis!,
+      slug,
+      price: 0,
+      image: imagePath,
+    });
+
+    revalidatePath("/");
+
+    return { success: true };
+  } catch (err) {
+    console.error("Error al publicar el libro:", err);
+    return { errors: { title: "Ocurrió un error inesperado. Intenta de nuevo." } };
   }
-
-  addBook({
-    title: title!,
-    author: author!,
-    synopsis: synopsis!,
-    slug,
-    price: 0,
-    image: imagePath,
-  });
-
-  revalidatePath("/");
-
-  return { success: true };
 }
